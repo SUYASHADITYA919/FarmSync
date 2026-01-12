@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmSync - Official Directory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo font-extrabold text-agri-dark flex items-center animate-pulse">
+            <i class="fa-solid fa-tractor"></i> FarmSync
+        </div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#" class="active">Directory</a>
+            <a href="#">Market</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-title">
+            <h1>Official Directory</h1>
+            <p>Connect with key agricultural officers and local representatives.</p>
+        </div>
+
+        <div class="search-bar-container">
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by Name, Role or Location...">
+            </div>
+            
+            <div class="filter-box">
+                <select id="roleFilter">
+                    <option value="All">All Roles</option>
+                    <option value="Agriculture Coordinator">Agriculture Coordinator</option>
+                    <option value="District Officer">District Level Officer</option>
+                    <option value="Kisan Salahkaar">Kisan Salahkaar</option>
+                    <option value="Plant Director">Asst. Director of Plants</option>
+                    <option value="Municipal Officer">Municipal Officer</option>
+                    <option value="Sarpanch">Sarpanch</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="directoryGrid" class="directory-grid">
+            </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <p>No contacts found matching your criteria.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 FarmSync: Empowering Farmers.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

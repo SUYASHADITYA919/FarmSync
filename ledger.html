@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmSync - FarmerLedger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'farm-green': '#38761D',
+                        'leaf-green': '#A9D18E',
+                        'soil-brown': '#654321',
+                        'accent-orange': '#FF9900',
+                        'surface': '#f3f4f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body{
+            background-image: url("cow.jpg");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .active-tab {
+            border-bottom: 4px solid #38761D;
+            color: #38761D;
+        }
+        .ledger-row:hover {
+            background-color: rgba(169, 209, 142, 0.1);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #38761D;
+            box-shadow: 0 0 0 2px rgba(56, 118, 29, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-surface min-h-screen font-sans">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-farm-green flex items-center gap-2">
+                    <i data-lucide="book-open"></i> FarmerLedger
+                </h1>
+                <h2><b>Digital bookkeeping for your crops, livestock, and loans.</b></h2>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm flex gap-6 items-center">
+                <div class="text-center">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Total Balance</p>
+                    <p id="total-balance" class="text-2xl font-bold text-farm-green">₹0</p>
+                </div>
+                <div class="h-10 w-px bg-gray-200"></div>
+                <button onclick="document.getElementById('add-modal').classList.remove('hidden')" class="bg-farm-green text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-opacity-90 transition">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Entry
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl border-l-4 border-farm-green shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Crop Investments</p>
+                        <h3 id="stat-crops" class="text-2xl font-bold text-gray-800">₹0</h3>
+                    </div>
+                    <div class="p-2 bg-green-50 text-farm-green rounded-lg">
+                        <i data-lucide="sprout"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border-l-4 border-accent-orange shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Livestock Income</p>
+                        <h3 id="stat-livestock" class="text-2xl font-bold text-gray-800">₹0</h3>
+                    </div>
+                    <div class="p-2 bg-orange-50 text-accent-orange rounded-lg">
+                        <i data-lucide="beef"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border-l-4 border-red-500 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Outstanding Loans</p>
+                        <h3 id="stat-loans" class="text-2xl font-bold text-gray-800">₹0</h3>
+                    </div>
+                    <div class="p-2 bg-red-50 text-red-500 rounded-lg">
+                        <i data-lucide="landmark"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger Tabs -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="flex border-b overflow-x-auto">
+                <button onclick="switchTab('crops')" id="tab-crops" class="px-8 py-4 font-semibold text-gray-500 active-tab whitespace-nowrap">Crop Ledger</button>
+                <button onclick="switchTab('livestock')" id="tab-livestock" class="px-8 py-4 font-semibold text-gray-500 whitespace-nowrap">Livestock Ledger</button>
+                <button onclick="switchTab('loans')" id="tab-loans" class="px-8 py-4 font-semibold text-gray-500 whitespace-nowrap">Loan Tracker</button>
+            </div>
+
+            <!-- Ledger Content -->
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead id="ledger-head">
+                            <!-- Headers injected by JS -->
+                        </thead>
+                        <tbody id="ledger-body" class="divide-y divide-gray-100">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="empty-state" class="hidden py-12 text-center text-gray-400">
+                    <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+                    <p>No entries found for this category.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Entry Modal -->
+    <div id="add-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-farm-green p-6 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold">New Ledger Entry</h2>
+                <button onclick="document.getElementById('add-modal').classList.add('hidden')" class="hover:bg-white/20 rounded-full p-1">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="ledger-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="form-category" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <option value="crops">Crop Investment</option>
+                        <option value="livestock">Livestock Income</option>
+                        <option value="loans">Loan Payment/Debt</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description / Item Name</label>
+                    <input type="text" id="form-desc" placeholder="e.g., Urea Fertilizer, Milk Sale" required class="w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+                        <input type="number" id="form-amount" placeholder="0.00" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="form-date" required class="w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-farm-green text-white py-3 rounded-lg font-bold hover:bg-opacity-90 transition mt-4">
+                    Save to Ledger
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data State
+        let ledgerData = {
+            crops: [
+                { id: 1, desc: 'Seeds (Wheat)', amount: -5000, date: '2025-12-10' },
+                { id: 2, desc: 'Fertilizer', amount: -2500, date: '2025-12-15' }
+            ],
+            livestock: [
+                { id: 3, desc: 'Milk Sales (Week 1)', amount: 8400, date: '2025-12-20' },
+                { id: 4, desc: 'Cattle Feed', amount: -3000, date: '2025-12-22' }
+            ],
+            loans: [
+                { id: 5, desc: 'Kisan Credit Card', amount: -50000, date: '2025-11-01' }
+            ]
+        };
+
+        let activeCategory = 'crops';
+
+        // DOM Elements
+        const ledgerHead = document.getElementById('ledger-head');
+        const ledgerBody = document.getElementById('ledger-body');
+        const emptyState = document.getElementById('empty-state');
+        const ledgerForm = document.getElementById('ledger-form');
+
+        // Functions
+        function switchTab(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => btn.classList.remove('active-tab'));
+            document.getElementById(`tab-${cat}`).classList.add('active-tab');
+            renderLedger();
+        }
+
+        function renderLedger() {
+            const data = ledgerData[activeCategory];
+            
+            // Render Header
+            ledgerHead.innerHTML = `
+                <tr class="text-gray-500 text-sm uppercase tracking-wider">
+                    <th class="py-4 px-2 font-semibold">Date</th>
+                    <th class="py-4 px-2 font-semibold">Description</th>
+                    <th class="py-4 px-2 font-semibold text-right">Amount (₹)</th>
+                    <th class="py-4 px-2 font-semibold text-right">Action</th>
+                </tr>
+            `;
+
+            // Render Body
+            ledgerBody.innerHTML = '';
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                data.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'ledger-row border-b border-gray-50';
+                    const amountClass = item.amount >= 0 ? 'text-green-600' : 'text-red-600';
+                    const sign = item.amount >= 0 ? '+' : '';
+                    
+                    row.innerHTML = `
+                        <td class="py-4 px-2 text-sm text-gray-600">${item.date}</td>
+                        <td class="py-4 px-2 font-medium text-gray-800">${item.desc}</td>
+                        <td class="py-4 px-2 text-right font-bold ${amountClass}">${sign}${item.amount.toLocaleString()}</td>
+                        <td class="py-4 px-2 text-right">
+                            <button onclick="deleteEntry('${item.id}')" class="text-gray-400 hover:text-red-500 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    `;
+                    ledgerBody.appendChild(row);
+                });
+            }
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function deleteEntry(id) {
+            ledgerData[activeCategory] = ledgerData[activeCategory].filter(i => i.id != id);
+            renderLedger();
+        }
+
+        function updateStats() {
+            const sum = (arr) => arr.reduce((acc, curr) => acc + curr.amount, 0);
+            
+            const cropsTotal = sum(ledgerData.crops);
+            const livestockTotal = sum(ledgerData.livestock);
+            const loansTotal = sum(ledgerData.loans);
+            
+            document.getElementById('stat-crops').textContent = `₹${Math.abs(cropsTotal).toLocaleString()}`;
+            document.getElementById('stat-livestock').textContent = `₹${livestockTotal.toLocaleString()}`;
+            document.getElementById('stat-loans').textContent = `₹${Math.abs(loansTotal).toLocaleString()}`;
+            
+            const grandTotal = cropsTotal + livestockTotal + loansTotal;
+            const balanceEl = document.getElementById('total-balance');
+            balanceEl.textContent = `₹${grandTotal.toLocaleString()}`;
+            balanceEl.className = `text-2xl font-bold ${grandTotal >= 0 ? 'text-farm-green' : 'text-red-600'}`;
+        }
+
+        // Form Handling
+        ledgerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const category = document.getElementById('form-category').value;
+            const desc = document.getElementById('form-desc').value;
+            let amount = parseFloat(document.getElementById('form-amount').value);
+            const date = document.getElementById('form-date').value;
+
+            // Simple logic: if crops or loans, treat as expense (negative) unless user specifies
+            // For a better UX, you could add an Income/Expense toggle
+            if (category === 'crops' || category === 'loans') {
+                amount = -Math.abs(amount);
+            }
+
+            const newEntry = {
+                id: Date.now(),
+                desc,
+                amount,
+                date
+            };
+
+            ledgerData[category].push(newEntry);
+            document.getElementById('add-modal').classList.add('hidden');
+            ledgerForm.reset();
+            switchTab(category);
+        });
+
+        // Initialize
+        window.onload = () => {
+            // Set default date to today
+            document.getElementById('form-date').valueAsDate = new Date();
+            renderLedger();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
